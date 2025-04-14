@@ -88,4 +88,4 @@ cd bbit-learning-labs/Tech-Lab-On-Campus/NewsFeed
 - [Redis Documentation](https://redis.io/documentation)
 - [Docker Documentation](https://docs.docker.com/)
 
-We hope you enjoy this learning experience and look forward to seeing your innovative solutions!
+We hope you enjoy this learning experience and look forward to seeing your innovative solutions! 
