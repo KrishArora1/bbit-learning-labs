@@ -9,14 +9,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#ffffff',
+        background: '#FFFFFF',
         secondaryBackground: '#EDF2FA',
-        foreground: '#000000',
-        title: '#000000',
+        foreground: '#00205B',    // Deeper, richer navy
+        title: '#00205B',         // Deeper, richer navy
         body: '#1C1C1C',
-        primary: '#FFA028',
-        secondary: '#1C1C1C',
-        highlight: '#FFA028',
+        primary: '#E3A82B',       // Balanced gold
+        secondary: '#00205B',     // Rich navy
+        highlight: '#E3A82B',     // Vibrant gold
       },
     },
   },

@@ -1,7 +1,5 @@
 """Flask app instance creation for Tech Lab 2025."""
 
-import os
-
 from flask import Flask, Response, jsonify
 
 from app import newsfeed
@@ -13,8 +11,8 @@ def create_app():
     """Create a Flask app instance."""
     app = Flask("app")
 
-    # Load JSON files into Redis
-    dataset_directory = os.path.join(os.path.dirname(__file__), "../resources/dataset/news")
+    # Load JSON files into Redis, do not edit
+    dataset_directory = "/Users/krisharora/bbit-learning-labs/Tech-Lab-On-Campus/NewsFeed/backend/resources/dataset/news"
     REDIS_CLIENT.save_entry("all_articles", load_json_files(dataset_directory))
 
     @app.route("/ping", methods=["GET"])
@@ -25,13 +23,13 @@ def create_app():
     @app.route("/get-newsfeed", methods=["GET"])
     def get_newsfeed() -> Response:
         """Flask route to get the latest newsfeed from datastore."""
-        # PART 1
-        return jsonify({}, 200)
+        articles = newsfeed.get_all_news()
+        return jsonify(articles, 200)
 
     @app.route("/get-featured-article", methods=["GET"])
     def get_featured_article() -> Response:
         """Flask route to get the featured article from datastore."""
-        # PART 2
-        return jsonify({}, 200)
+        featured_article = newsfeed.get_featured_news()
+        return jsonify(featured_article), 200
 
     return app

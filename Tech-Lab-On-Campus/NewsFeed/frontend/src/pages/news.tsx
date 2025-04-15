@@ -1,97 +1,107 @@
-import NewsCard from "@/components/NewsCard";
-import NewsFeed from "@/components/NewsFeed";
-import {useState, useEffect } from "react";
-
+import { useState, useEffect } from "react";
 import { Article } from "@/utils/types";
-
+import FeaturedNewsCard from "@/components/FeaturedNews";
+import NewsFeed from "@/components/NewsFeed";
+import NewsCard from "@/components/NewsCard";
 
 // DUMMY DATA
-import * as featureStoryJson from "../../public/test-data/test_feature.json";
-import FeaturedNewsCard from "@/components/FeaturedNews";
+import featureStoryJson from "../../public/test-data/test_feature.json";
 
+// Define main story
 let mainStory: Article = {
     title: featureStoryJson.thread.title,
     image_url: featureStoryJson.thread.main_image,
-    body: featureStoryJson.text.slice(0, 500) + "...",
-    author: featureStoryJson.author,                 // story author
-    url: featureStoryJson.url,                       // story url
-    publish_date: new Date(featureStoryJson.published)    // story publish date
-}
-
-
-// fake dummy data
-let moreNews: Article[] = [
-    {
-        title: "Dummy Story 1",
-        image_url: "/globe.svg",
-        body: "This is a story.",
-        url: "bloomberg.com",
-        author: "John Doe",
-        publish_date: new Date()
-    },
-    {
-        title: "Dummy Story 2",
-        image_url: "/globe.svg",
-        body: "This is a story.",
-        url: "bloomberg.com",
-        author: "John Doe",
-        publish_date: new Date()
-
-    },
-    {
-        title: "Dummy Story 3",
-        image_url: "/globe.svg",
-        body: "This is a story.",
-        url: "bloomberg.com",
-        author: "John Doe",
-        publish_date: new Date()
-    },
-]
+    body: featureStoryJson.text,
+    author: featureStoryJson.author,
+    url: featureStoryJson.url,
+    publish_date: new Date(featureStoryJson.published)
+};
 
 export default function News() {
-    // Some helpful info on React states: https://react.dev/reference/react/useState
-    const [articles, setArticles] = useState<Article[]>(moreNews);
-    const [featuredArticle, setFeaturedArticle] = useState<Article>(mainStory);
+    const [articles, setArticles] = useState<Article[]>([]);
+    const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // PART 4: Fetch the data from the API that the backend partner builds to
-    //         populate real data to the page.
     useEffect(() => {
         const fetchData = async () => {
-            // 1. Fetch the featured article from '/api/news/get-featured-article'
-            // 2. Fetch the news feed data from '/api/news/get-newsfeed'
-            // 3. Use the `set` functions defined above to update the `articles` and `featuredArticle` variables
+            setIsLoading(true);
+            try {
+                const articlesResponse = await fetch('/api/news/get-newsfeed', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-            // Once completing you should be able to see news articles different from the dummy data originally provided.
+                // Uncomment when API is ready
+                 const featuredArticleResponse = await fetch('/api/news/get-featured-article', {
+                     method: 'GET',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                });
 
-            // Hint: this may be useful to figure how to fetch data: https://medium.com/@bhanu.mt.1501/api-calls-in-react-js-342a09d5315f
-        }
+                const [articlesData, status] = await articlesResponse.json();
+                const articlesData2 = await featuredArticleResponse.json();
+                setArticles(articlesData);
+                setFeaturedArticle(articlesData2);
+            } catch (error) {
+                console.error("Failed to fetch news data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
         fetchData();
-    }, [])
+    }, []);
+
+    // Get trending articles for the sidebar
+    const trendingArticles = articles.slice(-10);
 
     return (
-        <div>
-            <div className="grid grid-cols-4 space-x-2 space-y-2 pt-2">
-                <div className="col-span-4 lg:col-span-3">
-                    <FeaturedNewsCard article={featuredArticle} />
-                    <NewsFeed articles={articles} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Page Header */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Latest News</h1>
+                <div className="h-1 w-24 bg-blue-600 rounded"></div>
+            </div>
 
-                    {/* Once you're done with Part 4, feel free to remove the span below! */}
-                    <span className="instruction">Part 4: Connect the backend and fetch real data</span>
-
+            {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
-                <div className="hidden lg:block col-span-1 overflow-hidden border-l border-slate-300">
-                    <div className="flex flex-col gap-4 divide-y divide-slate-300 space-x-2">
-                    {
-                        articles.slice(-6).map((article, i) => (
-                            <NewsCard
-                                key={`${article}_${i}`}
-                                article={article}
-                            />
-                        ))
-                    }
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    {/* Main Content */}
+                    <div className="lg:col-span-3 space-y-10">
+                        {/* Featured Article */}
+                        <section className="mb-12">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Featured Story</h2>
+                            <FeaturedNewsCard article={featuredArticle ?? mainStory} />
+                        </section>
+
+                        {/* News Feed */}
+                        <section>
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Top Stories</h2>
+                            <NewsFeed articles={articles} />
+                        </section>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="hidden lg:block">
+                        <div className="bg-gray-50 p-4 rounded-lg sticky top-8">
+                            <h2 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">Trending</h2>
+                            <div className="flex flex-col gap-6">
+                                {trendingArticles.map((article, i) => (
+                                    <div key={`trending_${i}`} className={i > 0 ? "pt-4 border-t border-gray-200" : ""}>
+                                        <NewsCard article={article} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
